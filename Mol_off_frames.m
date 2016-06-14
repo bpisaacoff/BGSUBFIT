@@ -1,7 +1,7 @@
 function off_frames=Mol_off_frames(guessfname,dfrlmsz,moloffwin)
 %% Mol_off_frames
 % Identifies frames in which two localized molecules are within a 2xdfrlmsz
-% sized box of each other using guess results from a average subtracted
+% sized box of each other using guess results from an average subtracted
 % movie
 %
 %%%% Inputs %%%%
@@ -46,7 +46,8 @@ load(guessfname,'guesses','movsz');
 off_frames=cell(size(guesses,1),1);
 
 h1=waitbar(0);
-waitbar(0,h1,['Creating off frames list for ',fname],'Interpreter', 'none');
+waitbar(0,h1,['Creating off frames list for ',fname]);
+set(findall(h1,'type','text'),'Interpreter','none');
 for ii=1:movsz(3)
     waitbar(ii/movsz(3),h1)
     %number of molecules in the current frame
@@ -84,6 +85,11 @@ for ii=1:movsz(3)
             % think it's needed and there is a big speed boost from leaving
             % it out. Please let me know if you find that this is needed.
             %off_frames{jj}=frmlst(~ismembc(frmlst,guesses(unique(mols2frms(dists,1)),1)));
+            
+            if length(off_frames{jj})<(0.05*moloffwin)
+                warning(['Guess ',num2str(jj),' only has ',...
+                    num2str(length(off_frames{jj})),' off frames. Consider increasing moloffwin'])
+            end
         end        
     end
 end

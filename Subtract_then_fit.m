@@ -11,10 +11,9 @@ function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,ed
 
 % guessfname is the filename for the guesses .mat file
 
-% MLE_fit is a boolean determing whether or not MLE fitting is used. Set to
+% MLE_fit  a Boolean determining whether or not MLE fitting is used. Set to
 % 1 to use MLE and to 0 to use least squares. Default is 0. Note that MLE
-% is quite slow, and so it's nots reccommended for a large number of
-% guesses
+% is quite slow, and so its nots recommended for a large number of guesses
 
 % edgedist is the distance in pixels from the edge of the frame to ignore.
 % default is 10
@@ -86,7 +85,8 @@ mxdst=maxdistfrac*dfrlmsz;
 fits=NaN(size(guesses,1),9);
 
 h1=waitbar(0);
-waitbar(0,h1,['Fitting ',fname],'Interpreter', 'none');
+waitbar(0,h1,['Fitting ',fname]);
+set(findall(h1,'type','text'),'Interpreter','none');
 for ii=1:size(guesses,1)   
     try
         waitbar(ii/size(guesses,1),h1)

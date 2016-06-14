@@ -11,12 +11,12 @@ function guesses=Guessing(mov_fname,dfrlmsz,bpthrsh,egdesz,pctile_frame,debugmod
 % nominal diameter, NOT the FWHM or something similar. Integer please!
 %
 % bpthrsh is the the percentile of brightnesses of the bandpassed image
-% below which those pixels will be ignored. Reccomended value is 90
+% below which those pixels will be ignored. default value is 90
 %
 % edgesz is the number of pixels on the edge of the image that will be
 % ignored. Default is egdesz = dfrlmsz
 %
-% pctile_frame is a boolean determiniing whether bpthrsh will be applied
+% pctile_frame is a boolean determining whether bpthrsh will be applied
 % frame by frame, or to the entire movie. Using the entire movie (setting
 % to 0) is more sensitive to low frequency noise and background changes,
 % but is a more robust guessing method. Using each frame tends to produce a

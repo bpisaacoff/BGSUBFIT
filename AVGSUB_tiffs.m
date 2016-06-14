@@ -10,14 +10,14 @@ function  AVGSUB_tiffs(filename,runningavg,subwidth,offset)
 % runningavg is a boolean. Set to 1 to do a running average or set to 0 to
 % do a static window background subtraction
 
-% subwidth is the width of temporal window that will be averaged. Need to
+% subwidth is the width of temporal window that will be averaged. Needs to
 % be an odd integer
 
 % offset is the intensity offset to deal with negative pixels. Default is
 % 1000
 
 % This functions doesn't output anything, instead saves the AVGSUB movie as
-% a tiff stack at the original file location with the original file name,
+% a .tif stack at the original file location with the original file name,
 % but with _avgsub appended to the name. Also outputs a short text file
 % with the parameters used
 
@@ -42,7 +42,8 @@ if nargin<4;offset=1000;end
 tfstk=TIFFStack(filename);
 
 h1=waitbar(0);
-waitbar(0,h1,['writing bg sub frames for ',fname],'Interpreter', 'none');
+waitbar(0,h1,['writing bg sub frames for ',fname]);
+set(findall(h1,'type','text'),'Interpreter','none');
 
 %initialize the array
 info=imfinfo(filename);

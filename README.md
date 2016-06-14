@@ -1,6 +1,6 @@
 # BGSUBFIT
 
-BGSUBFit is code to do real background subtraction of single molecule imaging movies so that the molecules can be fit and their intensity accurately measured even in the presence of an arbitrarily complex fluorescent background.
+BGSUBFit is code to do real background subtraction of single molecule imaging movies so that the molecules can be fit and their intensity accurately measured even in the presence of an arbitrarily complex low frequency fluorescent background.
 
 Written by Benjamin P Isaacoff at the University of Michigan.
 

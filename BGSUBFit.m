@@ -14,14 +14,14 @@ function BGSUBFit(directoryname,dfrlmsz,avgwin,moloffwin,varargin)
 %
 %   dfrlmsz   is the size of a diffraction limited spot in pixels. It's the
 % nominal diameter, NOT the FWHM or something similar. Must be an integer!
-% For an expecteded diffraction limited standard deviation, std, using the
+% For an expected diffraction limited standard deviation, std, using the
 % full width at 20% max, dfrlmsz = std*(2*sqrt(2*log(5)))
 %
 %   avgwin   is the window size (in frames) to be used for the average
 % subtraction. Needs to be an odd integer
 %
 %   moloffwin   is the window size (in frames) to be checked to determine
-%   if which frames that molecule was off and are thus safe to subtract.
+%   in which frames that molecule was off and are thus safe to subtract.
 %   Needs to be an even integer
 %
 %%% optional
@@ -29,9 +29,7 @@ function BGSUBFit(directoryname,dfrlmsz,avgwin,moloffwin,varargin)
 % called with a name value pair as is standard for Matlab functions. e.g.,
 % 'bpthrsh',90 would set the parameter bpthrsh=90
 %
-
-
-
+%
 %%%% Outputs %%%%
 
 %%%% Dependencies %%%%
@@ -47,12 +45,16 @@ function BGSUBFit(directoryname,dfrlmsz,avgwin,moloffwin,varargin)
 % Track_3D2
 % Tracking
 % Track_filter
+% hungarian
 
 %%%%
 % Written by Benjamin P Isaacoff at the University of Michigan
 % last update 6/11/16 BPI
 
-%% parameters
+%% parameters & defaults
+% You are of course welcome to change the default values, but I would
+% strongly urge you to instead set them as inputs to the function using a
+% name value pair. The default parameter values are:
 
 % actions
 % Do guessing
@@ -86,7 +88,7 @@ params.MLE_fit = 0;
 % Goodfit parameters. See Subtract_mol_off_frames for the details
 params.maxdistfrac = 0.75;
 params.stdtol = 5;
-params.maxerr = 3; % see the if statement after the next loop
+params.maxerr = 3; % if you change this please also change the statement after the next loop
 
 %Tracking parameters
 % minimum merit
@@ -131,8 +133,10 @@ if nargin>4
     end
 end
 
-%changing the error if doing MLE fitting
-if params.MLE_fit; params.maxerr=0.1; end
+%changing the default error if doing MLE fitting
+if params.MLE_fit && params.maxerr==3
+    params.maxerr=0.1; 
+end
 
 %% Select the movies
 display('Select the movies.')

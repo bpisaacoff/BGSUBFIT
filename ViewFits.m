@@ -9,9 +9,11 @@ function  ViewFits(movfname,fits_fname,circ_D,write_mov,autoscale_on,linewidth)
 % written to an avi. If set to 0 this function will be used in debug mode
 %
 % autoscale_on is a boolean determining if the movie greyscale will
-% be set frame frame. If set to 0 a handful of frames throughout the movie
+% be set frame by frame. If set to 0 a handful of frames throughout the movie
 % are used to set the grayscale
-
+% 
+% linewidth is the linewidth of the circles in the movie. Default is 1
+%
 %%%% Color Scheme %%%%
 % green circles are good fits
 % red circles are bad fits 
