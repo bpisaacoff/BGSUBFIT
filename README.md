@@ -45,4 +45,8 @@ The code not written by BPI:
 
 ## License
 
-TODO: Write license
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+  See License.txt
