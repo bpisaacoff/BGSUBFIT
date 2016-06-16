@@ -39,13 +39,13 @@ function guesses=Guessing(mov_fname,dfrlmsz,bpthrsh,egdesz,pctile_frame,debugmod
 %
 %
 %  Copyright 2016 Benjamin P Isaacoff
-% 
+%
 % Licensed under the Apache License, Version 2.0 (the "License"); you
 % may not use this file except in compliance with the License. You may
 % obtain a copy of the License at
-% 
+%
 %   http://www.apache.org/licenses/LICENSE-2.0
-% 
+%
 % Unless required by applicable law or agreed to in writing, software
 % distributed under the License is distributed on an "AS IS" BASIS,
 % WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
@@ -112,20 +112,24 @@ for ll=1:movsz(3)
         logim=logimov(:,:,ll);
     end
     
-    %search for shapes with an EquivDiameter of floor(dfrlmsz/2) or greater
-    bw2=bwpropfilt(logim,'EquivDiameter',[floor(dfrlmsz/2),inf]);
+    %search for shapes with an EquivDiameter of floor(dfrlmsz/2) to 2*dfrlmsz
+    bw2=bwpropfilt(logim,'EquivDiameter',[floor(dfrlmsz/2),2*dfrlmsz]);
     rgps=regionprops(bw2,'centroid');% find the centroids of those shapes
     centroids = cat(1, rgps.Centroid);%just rearraging the array
     %filling the array for this frame
-    guesses=cat(1,guesses,[repmat(ll,size(centroids(:,1))),round(centroids(:,2)),round(centroids(:,1))]);
+    if ~isempty(centroids)
+        guesses=cat(1,guesses,[repmat(ll,size(centroids(:,1))),round(centroids(:,2)),round(centroids(:,1))]);
+    end
     
     if debugmode %plot the guesses, for checking parameters
         if ~pctile_frame
             curfrm=double(tfstk(:,:,ll));
-        end            
+        end
         imshow(curfrm,prctile(curfrm(curfrm>0),[.1,99.8]))
-        vcs=viscircles([centroids(:,1),centroids(:,2)],repmat(dfrlmsz,[length(centroids(:,2)),1]));
-        set(vcs.Children,'LineWidth',1)
+        if ~isempty(centroids)
+            vcs=viscircles([centroids(:,1),centroids(:,2)],repmat(dfrlmsz,[length(centroids(:,2)),1]));
+            set(vcs.Children,'LineWidth',1)
+        end
         title(['frame ',num2str(ll)])
         
         keyboard
