@@ -6,7 +6,7 @@ Written by Benjamin P Isaacoff at the University of Michigan.
 
 ## Installation
 
-TODO: Describe the installation process
+Download the entire folder and unzip if you downloaded the .zip folder. Change your working directory in Matlab to this folder and simply call the functions in the command window as described in the user guide.
 
 ## Usage
 
@@ -49,4 +49,4 @@ The code not written by BPI:
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
-  See License.txt
+  See LICENSE.txt
