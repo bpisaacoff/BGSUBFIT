@@ -61,6 +61,9 @@ if nargin<6;debugmode=0;end
 %did you forget to set it to an integer?
 dfrlmsz=round(dfrlmsz);
 
+%pad size for the bandpass function
+pdsz=50;
+
 % last updated 6/11/16 BPI
 %% Peak Guessing
 tfstk=TIFFStack(mov_fname);
@@ -75,7 +78,9 @@ if ~pctile_frame
     bimgmov=zeros(movsz);
     %looping through and making the bandpassed movie
     for ll=1:movsz(3)
-        curfrm=double(tfstk(:,:,ll));
+        %padding the current frame to avoid the Fourier ringing associated
+        %with the edges of the image
+        curfrm=padarray(double(tfstk(:,:,ll)),[pdsz,pdsz],'symmetric');
         
         %bandpass parameters
         LP=1;%lnoise, should always be 1
@@ -83,7 +88,8 @@ if ~pctile_frame
         T=0;%threshold, now always zero
         lzero=egdesz;%how many pixels around the edge should be ignored, optional
         %bandpass it and put it in the array
-        bimgmov(:,:,ll)=bpass(curfrm,LP,HP,T,lzero);
+        bimg=bpass(curfrm,LP,HP,T,lzero+pdsz);
+        bimgmov(:,:,ll)=bimg((pdsz+1):(movsz(1)+pdsz),(pdsz+1):(movsz(2)+pdsz));
     end
     
     %convert it to a logical movie by thresholding with the bpthrsh
@@ -95,7 +101,10 @@ end
 for ll=1:movsz(3)
     %using the percentile on each frame
     if pctile_frame
+        %padding the current frame to avoid the Fourier ringing associated
+        %with the edges of the image
         curfrm=double(tfstk(:,:,ll));
+        curfrmbp=padarray(curfrm,[pdsz,pdsz],'symmetric');
         
         %bandpass parameters
         LP=1;%lnoise, should always be 1
@@ -103,7 +112,9 @@ for ll=1:movsz(3)
         T=0;%threshold, now always zero
         lzero=egdesz;%how many pixels around the edge should be ignored, optional
         %bandpass it
-        bimg=bpass(curfrm,LP,HP,T,lzero);
+        bimg=bpass(curfrmbp,LP,HP,T,lzero+pdsz);
+        %pull out the actual data
+        bimg=bimg((pdsz+1):(movsz(1)+pdsz),(pdsz+1):(movsz(2)+pdsz));
         
         %threshold with the bpthrsh percentile of the brightnesses for nonzero
         %pixels, then turn it into a logical array
