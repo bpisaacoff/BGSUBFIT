@@ -239,15 +239,15 @@ for ii = 1:nFits
     pStart(5) = mVals(2);
     
     % fit the data
-%     [fitPars(ii,:), ~, residual, ~, outPut(ii), ~, jacobian] = ...
-%         lsqcurvefit(fFun,pStart,X(~isnan(truImg(:)),:),truImg(~isnan(truImg(:))),lb,ub,opts);
-    fitPars(ii,:) = lsqcurvefit(fFun,pStart,X(~isnan(truImg(:)),:),truImg(~isnan(truImg(:))),lb,ub,opts);
+    [fitPars(ii,:), ~, residual, ~, ~, ~, jacobian] = ...
+        lsqcurvefit(fFun,pStart,X(~isnan(truImg(:)),:),truImg(~isnan(truImg(:))),lb,ub,opts);
+%     fitPars(ii,:) = lsqcurvefit(fFun,pStart,X(~isnan(truImg(:)),:),truImg(~isnan(truImg(:))),lb,ub,opts);
     % confidence intervals
-%     conf95(ii,:) = diff(nlparci(fitPars(ii,:), residual, 'jacobian', jacobian), 1, 2);
+    conf95(ii,:) = diff(nlparci(fitPars(ii,:), residual, 'jacobian', jacobian), 1, 2);
     
 end
 % disabled confidence intervals
-conf95 = fitPars;
+% conf95 = fitPars;
 
 %% shift origins back to lab frame
 fitPars(:,[1,2]) = fitPars(:,1:2) + guesses - params.nPixels;
