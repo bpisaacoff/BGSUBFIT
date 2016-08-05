@@ -64,7 +64,7 @@ dfrlmsz=round(dfrlmsz);
 %pad size for the bandpass function
 pdsz=50;
 
-% last updated 6/11/16 BPI
+% last updated 7/31/16 BPI
 %% Peak Guessing
 tfstk=TIFFStack(mov_fname);
 movsz=size(tfstk);%the size of the movie
@@ -74,14 +74,13 @@ guesses=zeros(1,3);
 
 %using the percentiles on the entire movie
 if ~pctile_frame
-    %initializing the bandpassed movie
+    %initializing the bandpassed movie    
     bimgmov=zeros(movsz);
     %looping through and making the bandpassed movie
     for ll=1:movsz(3)
         %padding the current frame to avoid the Fourier ringing associated
         %with the edges of the image
         curfrm=padarray(double(tfstk(:,:,ll)),[pdsz,pdsz],'symmetric');
-        
         %bandpass parameters
         LP=1;%lnoise, should always be 1
         HP=round(dfrlmsz*1.5);%lobject, set by diffraction limit

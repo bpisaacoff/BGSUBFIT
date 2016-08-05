@@ -60,8 +60,8 @@ load(guessfname,'guesses','movsz');
 off_frames=cell(size(guesses,1),1);
 
 h1=waitbar(0);
-waitbar(0,h1,['Creating off frames list for ',fname]);
 set(findall(h1,'type','text'),'Interpreter','none');
+waitbar(0,h1,['Creating off frames list for ',fname]);
 for ii=1:movsz(3)
     waitbar(ii/movsz(3),h1)
     %number of molecules in the current frame
@@ -74,7 +74,7 @@ for ii=1:movsz(3)
         if ii<=(moloffwin/2)%the first group of frames
             frmlst=ii+[-(ii-1):-1,1:(moloffwin/2)];
         elseif ii>=(movsz(3)-moloffwin/2)%the last group of frames
-            frmlst=ii+[(-moloffwin/2):-1,1:(movsz(3)-ii)];
+            frmlst=movsz(3)+(-moloffwin:0);
         else %all the frames in the middle
             frmlst=ii+[(-moloffwin/2):-1,1:(moloffwin/2)];
         end

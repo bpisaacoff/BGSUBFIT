@@ -56,8 +56,8 @@ if nargin<4;offset=1000;end
 tfstk=TIFFStack(filename);
 
 h1=waitbar(0);
-waitbar(0,h1,['writing bg sub frames for ',fname]);
 set(findall(h1,'type','text'),'Interpreter','none');
+waitbar(0,h1,['writing bg sub frames for ',fname]);
 
 %initialize the array
 info=imfinfo(filename);
@@ -76,7 +76,7 @@ if runningavg
         elseif jj>floor(subwidth/2)%frames in the middle
             v=cat(3,v(:,:,2:end),tfstk(:,:,jj+floor(subwidth/2)));
         end
-        bgsub_mov(:,:,jj)=bsxfun(@plus,double(curr_v),-mean(v,3))+offset;
+        bgsub_mov(:,:,jj)=bsxfun(@plus,double(curr_v),-mean(v,3))'+offset;
     end
 else
     for jj=1:floor(movsz(3)/subwidth)

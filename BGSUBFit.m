@@ -1,9 +1,8 @@
 function BGSUBFit(directoryname,dfrlmsz,avgwin,moloffwin,varargin)
 %% BGSUBFit
 % BGSUBFit is the wrapper function to do real background substraction of
-% single molecule imaging movies so that the molecules can be fit and their
+% single molecule imaging movies so that the molecules can be fit and its
 % intensity accurately measured.
-%
 %
 %
 %%%% Inputs %%%%
@@ -31,7 +30,10 @@ function BGSUBFit(directoryname,dfrlmsz,avgwin,moloffwin,varargin)
 %
 %
 %%%% Outputs %%%%
-
+% This function will output a series of movies & .mat files depending on
+% which functions are called. See each function and the user guide for
+% details
+%
 %%%% Dependencies %%%%
 % AVGSUB_tiffs
 % saveastiff
@@ -46,11 +48,11 @@ function BGSUBFit(directoryname,dfrlmsz,avgwin,moloffwin,varargin)
 % Tracking
 % Track_filter
 % hungarian
-
+%
 %%%%
 % Written by Benjamin P Isaacoff at the University of Michigan
-% last update 6/11/16 BPI
-
+% last update 7/31/16 BPI
+%
 %  Copyright 2016 Benjamin P Isaacoff
 % 
 % Licensed under the Apache License, Version 2.0 (the "License"); you
@@ -93,7 +95,7 @@ params.offset = 1000;
 params.bpthrsh = 90;
 %how many pixels to ignore around the edge of the frame
 params.egdesz = dfrlmsz;
-%compare brightnesses in each frame? if not, use entire movie
+%compare brightnesses in each frame?
 params.pctile_frame = 0;
 
 %Fitting parameters

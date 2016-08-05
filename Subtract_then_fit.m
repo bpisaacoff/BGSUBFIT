@@ -100,8 +100,8 @@ mxdst=maxdistfrac*dfrlmsz;
 fits=NaN(size(guesses,1),9);
 
 h1=waitbar(0);
-waitbar(0,h1,['Fitting ',fname]);
 set(findall(h1,'type','text'),'Interpreter','none');
+waitbar(0,h1,['Fitting ',fname]);
 for ii=1:size(guesses,1)   
     try
         waitbar(ii/size(guesses,1),h1)
@@ -114,7 +114,7 @@ for ii=1:size(guesses,1)
     if curfrmnum<=(moloffwin/2)%the first group of frames
         frmlst=curfrmnum+(-(curfrmnum-1):(moloffwin/2));
     elseif curfrmnum>=(movsz(3)-moloffwin/2)%the last group of frames
-        frmlst=curfrmnum+((-moloffwin/2):(movsz(3)-curfrmnum));
+        frmlst=movsz(3)+(-moloffwin:0);
     else %all the frames in the middle
         frmlst=curfrmnum+((-moloffwin/2):(moloffwin/2));
     end
@@ -144,8 +144,8 @@ for ii=1:size(guesses,1)
     
     %checking that it's not outside the frame and that off_frames for this
     %guess isn't empty
-    if (moly>edgedist && moly<(movsz(2)-edgedist) && molx>edgedist && molx<(movsz(1)-edgedist)) && ...
-            (moly>dfrlmsz && moly<(movsz(2)-dfrlmsz) && molx>dfrlmsz && molx<(movsz(1)-dfrlmsz))&& ... 
+    if (moly>edgedist && moly<(movsz(1)-edgedist) && molx>edgedist && molx<(movsz(2)-edgedist)) && ...
+            (moly>dfrlmsz && moly<(movsz(1)-dfrlmsz) && molx>dfrlmsz && molx<(movsz(2)-dfrlmsz))&& ... 
             ~isempty(off_frames{ii})
         %the average frame
         mean_mov=mean(mov(molx+(-dfrlmsz:dfrlmsz),moly+(-dfrlmsz:dfrlmsz),off_frames{ii}-frmlst(1)+1),3);

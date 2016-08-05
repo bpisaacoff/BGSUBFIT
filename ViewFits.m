@@ -23,11 +23,11 @@ function  ViewFits(movfname,fits_fname,circ_D,write_mov,autoscale_on,linewidth)
 if nargin<3;circ_D=7;end
 if nargin<4;write_mov=0;end
 if nargin<5;autoscale_on=0;end
-if nargin<6;linewidth=1;end
+if nargin<6;linewidth=1;endd
 %%
 
 %load in fits
-load(fits_fname)
+load(fits_fname);
 
 %create A `TIFFStack` object  which behaves like a read-only memory
 %mapped TIFF file
