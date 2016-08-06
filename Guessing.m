@@ -59,7 +59,10 @@ if nargin<5;pctile_frame=1;end
 if nargin<6;debugmode=0;end
 
 %did you forget to set it to an integer?
-dfrlmsz=round(dfrlmsz);
+if dfrlmsz~=round(dfrlmsz)
+    warning('dfrlmsz is not an integer, it has been rounded to the nearest integer')
+    dfrlmsz=round(dfrlmsz);
+end
 
 %pad size for the bandpass function
 pdsz=50;
@@ -93,8 +96,7 @@ if ~pctile_frame
     
     %convert it to a logical movie by thresholding with the bpthrsh
     %percentile of the brightnesses for nonzero pixels
-    logimov=logical(bimgmov.*(bimgmov>prctile(bimgmov(bimgmov>0),bpthrsh)));
-    clear bimgmov
+    bimgmov=logical(bimgmov.*(bimgmov>prctile(bimgmov(bimgmov>0),bpthrsh)));
 end
 
 for ll=1:movsz(3)
@@ -119,7 +121,7 @@ for ll=1:movsz(3)
         %pixels, then turn it into a logical array
         logim=logical(bimg.*(bimg>prctile(bimg(bimg>0),bpthrsh)));
     else
-        logim=logimov(:,:,ll);
+        logim=bimgmov(:,:,ll);
     end
     
     %search for shapes with an EquivDiameter of floor(dfrlmsz/2) to 2*dfrlmsz
