@@ -1,5 +1,5 @@
 function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,edgedist,maxdistfrac,stdtol,maxerr)
-%% Subtract_mol_off_frames 
+%% Subtract_mol_off_frames
 % subtracts the average intensity of off frames for each guess
 % stored in Mol_off_frames_fname.
 
@@ -39,13 +39,13 @@ function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,ed
 % gaussfit (for least squares fitting)
 
 %  Copyright 2016 Benjamin P Isaacoff
-% 
+%
 % Licensed under the Apache License, Version 2.0 (the "License"); you
 % may not use this file except in compliance with the License. You may
 % obtain a copy of the License at
-% 
+%
 %   http://www.apache.org/licenses/LICENSE-2.0
-% 
+%
 % Unless required by applicable law or agreed to in writing, software
 % distributed under the License is distributed on an "AS IS" BASIS,
 % WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
@@ -67,8 +67,11 @@ end
 
 tic;%for measuring the time to run the entire program
 %% Import the data
+%note some of the weird syntax in this section is due to the parfor loop
+%later on
 % load off frames list and some parameters
-load(Mol_off_frames_fname,'off_frames','dfrlmsz','moloffwin')
+dataload=load(Mol_off_frames_fname);
+dfrlmsz=dataload.dfrlmsz;off_frames=dataload.off_frames;moloffwin=dataload.moloffwin;
 
 %create A `TIFFStack` object  which behaves like a read-only memory
 %mapped TIFF file
@@ -77,7 +80,10 @@ movsz=size(tfstk);%the size of the movie
 [pathstr,fname,~] = fileparts(mov_fname);
 
 % load the guesses
-load(guessfname,'guesses');
+dataload=load(guessfname);
+guesses=dataload.guesses;
+
+clear dataload
 
 %check number of fits vs length of off frames
 if size(guesses,1)~=numel(off_frames);error('Unequal number of fits and number of off frames lists');end
@@ -104,13 +110,13 @@ fits=NaN(size(guesses,1),9);
 h1=waitbar(0);
 set(findall(h1,'type','text'),'Interpreter','none');
 waitbar(0,h1,['Fitting ',fname]);
-for ii=1:size(guesses,1)   
+for jj=1:movsz(3)
     try
-        waitbar(ii/size(guesses,1),h1)
+        waitbar(jj/movsz(3),h1)
     catch
     end
-        
-    curfrmnum=guesses(ii,1);
+    
+    curfrmnum=jj;
     
     %determine the frame list of frames to check for the current frame
     if curfrmnum<=(moloffwin/2)%the first group of frames
@@ -141,95 +147,100 @@ for ii=1:size(guesses,1)
         end
     end
     
-    %current molecule's position
-    molr=guesses(ii,2);
-    molc=guesses(ii,3);
+    guessessjj=guesses(guesses(:,1)==curfrmnum,:);
+    gessinds=find(guesses(:,1)==curfrmnum);
+    %preallocating the fits array for the parfor loop
+    curfits=NaN(size(guessessjj,1),9);
     
-    %checking that it's not outside the frame and that off_frames for this
-    %guess isn't empty
-    if (molc>edgedist && molc<(movsz(2)-edgedist) && molr>edgedist && molr<(movsz(1)-edgedist)) && ...
-            (molc>dfrlmsz && molc<(movsz(2)-dfrlmsz) && molr>dfrlmsz && molr<(movsz(1)-dfrlmsz))&& ... 
-            ~isempty(off_frames{ii})
-        %the average frame
-        mean_mov=mean(mov(molr+(-dfrlmsz:dfrlmsz),molc+(-dfrlmsz:dfrlmsz),off_frames{ii}-frmlst(1)+1),3);
-        %the molecule image
-        molim=mov(molr+(-dfrlmsz:dfrlmsz),molc+(-dfrlmsz:dfrlmsz),curfrmnum-frmlst(1)+1);
-        %the subtracted image
-        data=molim-mean_mov;        
+    
+    parfor ii=1:size(guessessjj,1)
         
-        %%%% Fitting %%%%
-        plot_on=0;%for debugging purposes only!
-        %the guessed tail intensity of the gaussian
-        gessb=min(data(:));
-        %the guessed amplitude, using the formula in MLEwG
-        gessN=range(data(:))*(4*pi*gesss^2);
-        %fit guess vector
-        params0=[dfrlmsz,dfrlmsz,gesss,gessb,gessN];
-        %The sum(:) of the the data
-        sumsum=sum(data(:));
+        %current molecule's position
+        molr=guessessjj(ii,2);
+        molc=guessessjj(ii,3);
         
-        if MLE_fit
-            %fitting with MLE
-            [paramsF,varianceF] = MLEwG (data,params0,1,plot_on,1);
-            paramsF=[paramsF,varianceF];
-            %recalculating the values based on their equations to match
-            paramsF(5)=paramsF(5)*(2*pi*paramsF(3)^2);
-            paramsF(4)=sqrt(paramsF(4));            
-            errbad=varianceF>maxerr;%too much error on fit?
-        else
-            %fitting with least squares
-            try
-                [fitPars,conf95,~,~]=gaussFit(data,'searchBool',0,'nPixels',2*dfrlmsz+1,'checkVals',0);
-            catch
-                conf95=[inf,inf];
-                fitPars=[0,0,0,0,0,0];
-                warning('gaussfit error')
+        %checking that it's not outside the frame and that off_frames for this
+        %guess isn't empty
+        if (molc>edgedist && molc<(movsz(2)-edgedist) && molr>edgedist && molr<(movsz(1)-edgedist)) && ...
+                (molc>dfrlmsz && molc<(movsz(2)-dfrlmsz) && molr>dfrlmsz && molr<(movsz(1)-dfrlmsz))&& ...
+                ~isempty(off_frames{gessinds(ii)})
+            %the average frame
+            mean_mov=mean(mov(molr+(-dfrlmsz:dfrlmsz),molc+(-dfrlmsz:dfrlmsz),off_frames{gessinds(ii)}-frmlst(1)+1),3);
+            %the molecule image
+            molim=mov(molr+(-dfrlmsz:dfrlmsz),molc+(-dfrlmsz:dfrlmsz),curfrmnum-frmlst(1)+1);
+            %the subtracted image
+            data=molim-mean_mov;
+            
+            %%%% Fitting %%%%
+            plot_on=0;%for debugging purposes only! Note doesn't work while in a parfor loop
+            %the guessed tail intensity of the gaussian
+            gessb=min(data(:));
+            %the guessed amplitude, using the formula in MLEwG
+            gessN=range(data(:))*(4*pi*gesss^2);
+            %fit guess vector
+            params0=[dfrlmsz,dfrlmsz,gesss,gessb,gessN];
+            %The sum(:) of the the data
+            sumsum=sum(data(:));
+            
+            if MLE_fit
+                %fitting with MLE
+                [paramsF,varianceF] = MLEwG (data,params0,1,plot_on,1);
+                paramsF=[paramsF,varianceF];
+                %recalculating the values based on their equations to match
+                paramsF(5)=paramsF(5)*(2*pi*paramsF(3)^2);
+                paramsF(4)=sqrt(paramsF(4));
+                errbad=varianceF>maxerr;%too much error on fit?
+            else
+                %fitting with least squares
+                try
+                    [fitPars,conf95,~,~]=gaussFit(data,'searchBool',0,'nPixels',2*dfrlmsz+1,'checkVals',0);
+                catch
+                    conf95=[inf,inf];
+                    fitPars=[0,0,0,0,0,0];
+                    warning('gaussfit error')
+                end
+                %converting the variables to match the output of MLEwG
+                paramsF=[fitPars(1),fitPars(2),fitPars(3),fitPars(5),...
+                    fitPars(4),mean(conf95([1,2]))];
+                errbad=mean(conf95([1,2]))>maxerr;%too much error on fit?
             end
-            %converting the variables to match the output of MLEwG
-            paramsF=[fitPars(1),fitPars(2),fitPars(3),fitPars(5),...
-                fitPars(4),mean(conf95([1,2]))];            
-            errbad=mean(conf95([1,2]))>maxerr;%too much error on fit?            
-        end
-        %Convert back into full frame coordinates, NOTE the -1!
-        act_r=paramsF(1)-dfrlmsz-1+molr;
-        act_c=paramsF(2)-dfrlmsz-1+molc;
-        
-        %%%% Fit Checks %%%%
-        % fits is [frame number,row pos,col pos,width, offset,amplitude,err,sum(:),goodfit boolean]
-        if (paramsF(3)<=(stdtol*params0(3)) && paramsF(3)>=(params0(3)/stdtol)) && ... %Compare width with diffraction limit
-                ~errbad && ... %too much error on fit?
-                (paramsF(1)<=(params0(1)+mxdst) && paramsF(1)>=(params0(1)-mxdst)) && ... %check row position
-                (paramsF(2)<=(params0(2)+mxdst) && paramsF(2)>=(params0(2)-mxdst)) && ...  %check col position
-                ~any([paramsF([1,2,3,5]),sumsum]<0) %none of the fitted parameters should be negative, except the offset!
+            %Convert back into full frame coordinates, NOTE the -1!
+            act_r=paramsF(1)-dfrlmsz-1+molr;
+            act_c=paramsF(2)-dfrlmsz-1+molc;
             
-            %Put the results into the array
-            fits(ii,:)=[curfrmnum,act_r,act_c,paramsF(3:6),sumsum,1];            
-        else
-            %track the guesses that don't get fit, for debugging/viewfits
-            %purposes
-            fits(ii,:)=[curfrmnum,act_r,act_c,paramsF(3:6),sumsum,0];
-        end        
-        %debugging
-        if plot_on
-            h12=figure(12);
-            subplot(1,3,1)
-            imshow(mean_mov,[])
-            title('Mean BG')
-            subplot(1,3,2)
-            imshow(molim,[])
-            title('Raw Molecule')
-            subplot(1,3,3)
-            imshow(data,[])
-            title('BGSUB')
-            annotation('textbox', [0 0.9 1 0.1], ...
-                'String', ['Frame # ',num2str(curfrmnum),'   Guess # ',num2str(ii)], ...
-                'EdgeColor', 'none', ...
-                'HorizontalAlignment', 'center')
-            
-            keyboard
-            close(h12)
+            %%%% Fit Checks %%%%
+            % fits is [frame number,row pos,col pos,width, offset,amplitude,err,sum(:),goodfit boolean]
+            if (paramsF(3)<=(stdtol*params0(3)) && paramsF(3)>=(params0(3)/stdtol)) && ... %Compare width with diffraction limit
+                    ~errbad && ... %too much error on fit?
+                    (paramsF(1)<=(params0(1)+mxdst) && paramsF(1)>=(params0(1)-mxdst)) && ... %check row position
+                    (paramsF(2)<=(params0(2)+mxdst) && paramsF(2)>=(params0(2)-mxdst)) && ...  %check col position
+                    ~any([paramsF([1,2,3,5]),sumsum]<0) %none of the fitted parameters should be negative, except the offset!
+                
+                %Put the results into the array
+                curfits(ii,:)=[curfrmnum,act_r,act_c,paramsF(3:6),sumsum,1];
+            else
+                %track the guesses that don't get fit, for debugging/viewfits
+                %purposes
+                curfits(ii,:)=[curfrmnum,act_r,act_c,paramsF(3:6),sumsum,0];
+            end
+             %debugging
+            if plot_on
+                figure(12)
+                subplot(1,3,1)
+                imshow(mean_mov,[])
+                title('Mean BG')
+                subplot(1,3,2)
+                imshow(molim,[])
+                title('Raw Molecule')
+                subplot(1,3,3)
+                imshow(data,[])
+                title('BGSUB')
+                
+                keyboard
+            end
         end
     end
+    fits(gessinds,:)=curfits;    
 end
 
 fits_col_headers={'frame num','row pos (px)','column pos (px)','sigma (px)','offset','N','error','sum(:)','goodfit boolean'};

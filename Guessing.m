@@ -27,7 +27,8 @@ function guesses=Guessing(mov_fname,dfrlmsz,bpthrsh,egdesz,pctile_frame,debugmod
 % the guesses. Default is 0
 %
 %%%% Outputs %%%%
-% guesses is an array with columns 1. frame #, 2. x pos, 3. y pos
+% guesses is an array with columns 1. frame #, 2. row #, 3. column # of the
+% guesses
 %
 % The program currently also writes a .mat file with guesses and all of the
 % user parameters saved.
@@ -67,10 +68,12 @@ end
 %pad size for the bandpass function
 pdsz=50;
 
-% last updated 7/31/16 BPI
+tic;%for measuring the time to run the entire program
+% last updated 8/12/16 BPI
 %% Peak Guessing
 tfstk=TIFFStack(mov_fname);
 movsz=size(tfstk);%the size of the movie
+[~,fname] = fileparts(mov_fname);
 
 %intializing the guess indices cell array
 guesses=zeros(1,3);
@@ -99,7 +102,12 @@ if ~pctile_frame
     bimgmov=logical(bimgmov.*(bimgmov>prctile(bimgmov(bimgmov>0),bpthrsh)));
 end
 
+h1=waitbar(0);
+set(findall(h1,'type','text'),'Interpreter','none');
+waitbar(0,h1,['Making guesses for ',fname]);
+
 for ll=1:movsz(3)
+    waitbar(ll/movsz(3),h1)%update waitbar
     %using the percentile on each frame
     if pctile_frame
         %padding the current frame to avoid the Fourier ringing associated
@@ -130,7 +138,7 @@ for ll=1:movsz(3)
     centroids = cat(1, rgps.Centroid);%just rearraging the array
     %filling the array for this frame
     if ~isempty(centroids)
-        guesses=cat(1,guesses,[repmat(ll,size(centroids(:,1))),round(centroids(:,2)),round(centroids(:,1))]);
+        guesses=cat(1,guesses,[repmat(ll,size(centroids(:,2))),round(centroids(:,2)),round(centroids(:,1))]);
     end
     
     if debugmode %plot the guesses, for checking parameters
@@ -139,6 +147,7 @@ for ll=1:movsz(3)
         end
         imshow(curfrm,prctile(curfrm(curfrm>0),[.1,99.8]))
         if ~isempty(centroids)
+            %viscircles is reversed
             vcs=viscircles([centroids(:,1),centroids(:,2)],repmat(dfrlmsz,[length(centroids(:,2)),1]));
             set(vcs.Children,'LineWidth',1)
         end
@@ -149,8 +158,14 @@ for ll=1:movsz(3)
 end
 guesses=guesses(2:end,:);%get rid of first row of zeros
 
+tictoc=toc;%the time to run the entire program
+
 [pathstr,name,~] = fileparts(mov_fname);
-save([pathstr,filesep,name,'_guesses.mat'],'guesses','dfrlmsz','egdesz','pctile_frame','bpthrsh','movsz');
+save([pathstr,filesep,name,'_guesses.mat'],'guesses','dfrlmsz','egdesz','pctile_frame','bpthrsh','movsz','tictoc');
+
+try
+    close(h1)%closing the waitbar
+end
 
 end
 

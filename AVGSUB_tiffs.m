@@ -1,6 +1,6 @@
 function  AVGSUB_tiffs(filename,runningavg,subwidth,offset)
-%% BatchBGSUB_tiffs
-% updated BPI 5/31/16
+%% AVGSUB_tiffs
+% updated BPI 8/12/16
 % This function does average subtraction on a batch of tiff stacks
 % movies. Currently does the entire movie, I might add functionality to do
 % a portion of the frames only.
@@ -44,6 +44,8 @@ function  AVGSUB_tiffs(filename,runningavg,subwidth,offset)
 %instructions
 subwidth=ceil(subwidth/2)*2-1;
 
+tic;%for measuring the time to run the entire program
+
 %% Do the AVGSUB
 
 [pathstr,fname,~] = fileparts(filename);
@@ -54,15 +56,13 @@ if nargin<4;offset=1000;end
 %create A `TIFFStack` object  which behaves like a read-only memory
 %mapped TIFF file
 tfstk=TIFFStack(filename);
+movsz=size(tfstk);%the size of the movie
 
 h1=waitbar(0);
 set(findall(h1,'type','text'),'Interpreter','none');
-waitbar(0,h1,['writing bg sub frames for ',fname]);
+waitbar(0,h1,['writing avg sub frames for ',fname]);
 
-%initialize the array
-info=imfinfo(filename);
-movsz=[info(1).Width,info(1).Height,numel(info)];%the size of the movie
-bgsub_mov=zeros(movsz(1),movsz(2),movsz(3));
+bgsub_mov=zeros(movsz);
 if runningavg
     if mod(subwidth,2)==0;error('subwidth needs to be an odd integer');end
     v=tfstk(:,:,1:subwidth); %the first subwidth frames
@@ -76,11 +76,11 @@ if runningavg
         elseif jj>floor(subwidth/2)%frames in the middle
             v=cat(3,v(:,:,2:end),tfstk(:,:,jj+floor(subwidth/2)));
         end
-        bgsub_mov(:,:,jj)=bsxfun(@plus,double(curr_v),-mean(v,3))'+offset;
+        bgsub_mov(:,:,jj)=bsxfun(@plus,double(curr_v),-mean(v,3))+offset;
     end
 else
     for jj=1:floor(movsz(3)/subwidth)
-        waitbar(jj/floor(nframes/subwidth),h1)
+        waitbar(jj/movsz(3),h1)
         if jj~=floor(movsz(3)/subwidth)
             v=tfstk(:,:,1+subwidth*(jj-1):subwidth*jj);
             bgsub_mov(:,:,1+subwidth*(jj-1):subwidth*jj)=bsxfun(@plus,double(v),-mean(v,3))+offset;
@@ -100,11 +100,14 @@ try
     close(h1)
 end
 
+tictoc=toc;%the time to run the entire program
+
 %save a .txt file with the parameters
 fileID = fopen([pathstr,filesep,fname,'_avgsub_info.txt'],'w');
 fprintf(fileID,['running average:\t',num2str(runningavg),'\n']);
 fprintf(fileID,['subwidth:\t',num2str(subwidth),'\n']);
-fprintf(fileID,['offset:\t',num2str(offset)]);
+fprintf(fileID,['offset:\t',num2str(offset),'\n']);
+fprintf(fileID,['time to run:\t',num2str(tictoc)]);
 fclose(fileID);
 
 end

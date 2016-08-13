@@ -41,14 +41,15 @@ dfrlmsz=round(dfrlmsz);
 %this one
 moloffwin=ceil(moloffwin/2)*2;
 
-% last updated 6/11/16 BPI
+% last updated 8/12/16 BPI
 
 % NOTE: if you're inspecting this code, you'll notice that I'm making use
 % of ismembc instead of ismember. ismembc is an undocumented helper
-% function that is much faster than ismember in this case. Basically
-% ismember eventually calls ismembc, but wastes a lot of time before
+% function that is much faster than ismember in this case. Basicallc
+% ismember eventuallc calls ismembc, but wastes a lot of time before
 % getting there that we've cut out.
 
+tic;%for measuring the time to run the entire program
 %% Constructing off frames lists
 
 [pathstr,fname,~] = fileparts(guessfname);
@@ -80,16 +81,16 @@ for ii=1:movsz(3)
         end
         
         %find the rows of the guesses that are in the current frame list,
-        %then pull out the x & y coordinates
+        %then pull out the row & column #'s
         mols2frms=find(ismembc(guesses(:,1),frmlst));
-        allx=guesses(mols2frms,2);
-        ally=guesses(mols2frms,3);        
+        allr=guesses(mols2frms,2);
+        allc=guesses(mols2frms,3);        
         
         for jj=frmrows(1):frmrows(end)
             %current molecule's position
-            molx=guesses(jj,2);
-            moly=guesses(jj,3);
-            dists=(abs(allx-molx)<dfrlmsz) & (abs(ally-moly)<dfrlmsz);
+            molr=guesses(jj,2);
+            molc=guesses(jj,3);
+            dists=(abs(allr-molr)<dfrlmsz) & (abs(allc-molc)<dfrlmsz);
             
             %save the lists of frames  in which the current localization is off.
             off_frames{jj}=frmlst(~ismembc(frmlst,guesses((mols2frms(dists,1)),1)));
@@ -112,7 +113,9 @@ try
     close(h1)
 end
 
+tictoc=toc;%the time to run the entire program
+
 %save the data
-save([pathstr,filesep,fname,'_Mol_off_frames.mat'],'off_frames','dfrlmsz','moloffwin','movsz')
+save([pathstr,filesep,fname,'_Mol_off_frames.mat'],'off_frames','dfrlmsz','moloffwin','movsz','tictoc')
 
 end
