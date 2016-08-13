@@ -19,6 +19,10 @@ function ROI_picker( directoryname,mov_prd,prct_frms,append_str)
 %
 % append_str is the string which will be appended to the input movie name.
 % Default is '_ROI'
+%
+% the function will also write a .txt file called filename_ROI_info.txt
+% with the ROI coordinates.
+
 
 %%%% Dependencies %%%%
 % TIFFStack
