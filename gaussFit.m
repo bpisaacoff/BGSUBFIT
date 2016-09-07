@@ -52,6 +52,7 @@ function [fitPars, conf95, guesses, outPut]=gaussFit(img, varargin)
 %       img = exp(-x.^2/2/2^2-y.^2/2/3^2)+.02*randn(size(x));
 %       p = gaussFit(img,'widthGuess',2);
 opts = optimset('Display','off');
+warning('off','MATLAB:singularMatrix');
 % warning('off','all')
 imSize = size(img);
 
@@ -276,4 +277,5 @@ h = title(['Frame number ' num2str(params.frameNumber)]);
 set(gca,'Visible','off');
 set(h,'Visible','on');
 end
+warning('on','MATLAB:singularMatrix');
 end

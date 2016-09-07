@@ -41,6 +41,9 @@ if nargin<3
 end
 
 %% Track it
+[~,fname] = fileparts(fits_fname);
+disp(['Tracking ',fname]);
+
 tracks = Tracking(fits_fname,trackparams);
 
 load(fits_fname,'fits')

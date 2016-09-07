@@ -102,7 +102,6 @@ params.pctile_frame = 0;
 % do MLE fitting? If not least squares fitting will be used
 params.MLE_fit = 0;
 % Goodfit parameters. See Subtract_mol_off_frames for the details
-params.maxdistfrac = 0.75;
 params.stdtol = 5;
 params.maxerr = 3; % if you change this please also change the statement after the next loop
 
@@ -219,7 +218,7 @@ if params.fitting
         Subtract_then_fit([dlocs{ii},filesep,dnames{ii},'.tif'],...
             [dlocs{ii},filesep,dnames{ii},'_avgsub_guesses_Mol_off_frames'],...
             [dlocs{ii},filesep,dnames{ii},'_avgsub_guesses'],...
-            params.MLE_fit,params.egdesz,params.maxdistfrac,params.stdtol,params.maxerr);        
+            params.MLE_fit,params.egdesz,params.stdtol,params.maxerr);        
     end
 end
 

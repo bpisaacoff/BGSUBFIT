@@ -38,6 +38,8 @@ movsz=size(tfstk);%the size of the movie
 if write_mov
     v = VideoWriter([pathstr,filesep,name,'_ViewFits.avi'],'Uncompressed AVI');
     open(v);
+    
+    disp(['Making ViewFits for ',name]);
 end
 
 if ~autoscale_on
@@ -92,24 +94,6 @@ for ii=1:movsz(3)
         vcs=viscircles([thisfrm_trk(:,3),thisfrm_trk(:,2)],repmat(circ_D+4,[length(thisfrm_trk(:,3)),1]));
         set(vcs.Children,'LineWidth',linewidth,'Color','magenta')
     end
-
-%  %note that for plotting x and y are switched...
-%     if ~isempty(thisfrm_gf)
-%         vcs=viscircles([thisfrm_gf(:,2),thisfrm_gf(:,3)],repmat(circ_D,[length(thisfrm_gf(:,3)),1]));
-%         set(vcs.Children,'LineWidth',linewidth,'Color','green')
-%     end
-%     if ~isempty(thisfrm_bf)
-%         vcs=viscircles([thisfrm_bf(:,2),thisfrm_bf(:,3)],repmat(circ_D,[length(thisfrm_bf(:,3)),1]));
-%         set(vcs.Children,'LineWidth',linewidth,'Color','red')
-%     end
-%     if ~isempty(thisfrm_ongnr)
-%         vcs=viscircles([thisfrm_ongnr(:,2),thisfrm_ongnr(:,3)],repmat(circ_D+2,[length(thisfrm_ongnr(:,3)),1]));
-%         set(vcs.Children,'LineWidth',linewidth,'Color','blue')
-%     end
-%     if ~isempty(thisfrm_trk)
-%         vcs=viscircles([thisfrm_trk(:,2),thisfrm_trk(:,3)],repmat(circ_D+4,[length(thisfrm_trk(:,3)),1]));
-%         set(vcs.Children,'LineWidth',linewidth,'Color','magenta')
-%     end
     
     if write_mov
         frame = getframe;
@@ -117,8 +101,7 @@ for ii=1:movsz(3)
     else
         title([name,' frame #',num2str(ii)],'Interpreter', 'none')
         keyboard
-    end
-    
+    end    
 end
 
 if write_mov

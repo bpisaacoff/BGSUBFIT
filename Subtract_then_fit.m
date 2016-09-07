@@ -1,4 +1,4 @@
-function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,edgedist,maxdistfrac,stdtol,maxerr)
+function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,edgedist,stdtol,maxerr)
 %% Subtract_mol_off_frames 
 % subtracts the average intensity of off frames for each guess
 % stored in Mol_off_frames_fname.
@@ -17,9 +17,6 @@ function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,ed
 
 % edgedist is the distance in pixels from the edge of the frame to ignore.
 % default is 10
-
-% maxdistfrac is max x&y distance of fit from guess,as a fraction of
-% dfrlmsz, default is 0.75
 
 % stdtol is tolerance on fit Gaussian STD, to leae filtering options for
 % later, default value is 5
@@ -55,9 +52,8 @@ function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,ed
 
 if nargin<4;MLE_fit=0;end
 if nargin<5;edgedist=10;end
-if nargin<6;maxdistfrac=0.75;end
-if nargin<7;stdtol=5;end
-if nargin<8;
+if nargin<6;stdtol=5;end
+if nargin<7;
     if MLE_fit
         maxerr=0.1;
     else
@@ -91,12 +87,8 @@ mov=double(tfstk(:,:,curframes));
 %the conversion between dfrlmsz and the STD of the Gaussian, reccomended
 %using the full width at 20% max given by (2*sqrt(2*log(5)))
 dfD2std=(2*sqrt(2*log(5)));
-
 %the guessed std
 gesss=dfrlmsz/dfD2std;
-
-%max x&y distance of fit from guess
-mxdst=maxdistfrac*dfrlmsz;
 
 %fit info is [frame number,row,col,width,offset,amplitude,variance,sum(:),goodfit boolean]
 fits=NaN(size(guesses,1),9);
@@ -187,7 +179,7 @@ for ii=1:size(guesses,1)
             end
             %converting the variables to match the output of MLEwG
             paramsF=[fitPars(1),fitPars(2),fitPars(3),fitPars(5),...
-                fitPars(4),mean(conf95([1,2]))];            
+                fitPars(4),mean(conf95([1,2]))];
             errbad=mean(conf95([1,2]))>maxerr;%too much error on fit?            
         end
         %Convert back into full frame coordinates, NOTE the -1!
@@ -198,9 +190,7 @@ for ii=1:size(guesses,1)
         % fits is [frame number,row pos,col pos,width, offset,amplitude,err,sum(:),goodfit boolean]
         if (paramsF(3)<=(stdtol*params0(3)) && paramsF(3)>=(params0(3)/stdtol)) && ... %Compare width with diffraction limit
                 ~errbad && ... %too much error on fit?
-                (paramsF(1)<=(params0(1)+mxdst) && paramsF(1)>=(params0(1)-mxdst)) && ... %check row position
-                (paramsF(2)<=(params0(2)+mxdst) && paramsF(2)>=(params0(2)-mxdst)) && ...  %check col position
-                ~any([paramsF([1,2,3,5]),sumsum]<0) %none of the fitted parameters should be negative, except the offset!
+                ~any([paramsF([1,2,5]),sumsum]<0) %none of the fitted parameters should be negative, except the offset!
             
             %Put the results into the array
             fits(ii,:)=[curfrmnum,act_r,act_c,paramsF(3:6),sumsum,1];            
@@ -236,7 +226,7 @@ fits_col_headers={'frame num','row pos (px)','column pos (px)','sigma (px)','off
 tictoc=toc;%the time to run the entire program
 %save the data
 save([pathstr,filesep,fname,'_AccBGSUB_fits.mat'],'fits','fits_col_headers','mov_fname','Mol_off_frames_fname','guessfname',...
-    'MLE_fit','maxdistfrac','stdtol','maxerr','dfrlmsz','tictoc')
+    'MLE_fit','stdtol','maxerr','dfrlmsz','movsz','moloffwin','tictoc')
 
 try
     close(h1)
