@@ -40,7 +40,7 @@ function  AVGSUB_tiffs(filename,runningavg,subwidth,offset)
 % implied. See the License for the specific language governing
 % permissions and limitations under the License.
 
-%rounding subwidth up to the next odd number, in case you didn't read the
+%rounding subwidth up to the next odd number down, in case you didn't read the
 %instructions
 subwidth=ceil(subwidth/2)*2-1;
 
@@ -67,7 +67,7 @@ if runningavg
     if mod(subwidth,2)==0;error('subwidth needs to be an odd integer');end
     v=tfstk(:,:,1:subwidth); %the first subwidth frames
     for jj=1:movsz(3)
-        waitbar(jj/movsz(3),h1)
+        try;waitbar(jj/movsz(3),h1);end
         curr_v=tfstk(:,:,jj);%current frame
         if jj>(movsz(3)-floor(subwidth/2))%the last subwidth frames
             if jj==(movsz(3)-floor(subwidth/2))+1%only need to fill it once
@@ -80,7 +80,7 @@ if runningavg
     end
 else
     for jj=1:floor(movsz(3)/subwidth)
-        waitbar(jj/movsz(3),h1)
+        try;waitbar(jj/movsz(3),h1);end
         if jj~=floor(movsz(3)/subwidth)
             v=tfstk(:,:,1+subwidth*(jj-1):subwidth*jj);
             bgsub_mov(:,:,1+subwidth*(jj-1):subwidth*jj)=bsxfun(@plus,double(v),-mean(v,3))+offset;

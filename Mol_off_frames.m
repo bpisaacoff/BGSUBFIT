@@ -64,7 +64,7 @@ h1=waitbar(0);
 set(findall(h1,'type','text'),'Interpreter','none');
 waitbar(0,h1,['Creating off frames list for ',fname]);
 for ii=1:movsz(3)
-    waitbar(ii/movsz(3),h1)
+    try; waitbar(ii/movsz(3),h1); end
     %number of molecules in the current frame
     frmrows=find(guesses(:,1)==ii);
     nummol=length(frmrows);

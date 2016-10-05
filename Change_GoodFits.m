@@ -34,7 +34,13 @@ for ii=1:numel(datalist); datalist{ii}=[dataloc datalist{ii}]; end
 
 %% Make the new good_fit vector
 
+h1=waitbar(0);
+set(findall(h1,'type','text'),'Interpreter','none');
+waitbar(0,h1,'Changing GoodFits');
+
 for ii=1:numel(dlocs);
+    try; waitbar(ii/numel(dlocs),h1); end
+    
     fits_fname=[dlocs{ii},filesep,dnames{ii}];
     load(fits_fname,'fits','stdtol','maxerr','dfrlmsz')%load in the necessary variables
     % change the parameters if they were sent
@@ -54,7 +60,7 @@ for ii=1:numel(dlocs);
     %update the fits array
     fits(:,9)=goodfits;
     %save it
-    save(fits_fname,'fits','stdtol','maxerr','dfrlmsz','-append')%load in the necessary variables 
+    save(fits_fname,'fits','stdtol','maxerr','dfrlmsz','-append')%append the new vector and the used parameters
 end
 end
 

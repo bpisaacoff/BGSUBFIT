@@ -97,10 +97,7 @@ h1=waitbar(0);
 set(findall(h1,'type','text'),'Interpreter','none');
 waitbar(0,h1,['Fitting ',fname]);
 for ii=1:size(guesses,1)   
-    try
-        waitbar(ii/size(guesses,1),h1)
-    catch
-    end
+    try; waitbar(ii/size(guesses,1),h1); end
         
     curfrmnum=guesses(ii,1);
     

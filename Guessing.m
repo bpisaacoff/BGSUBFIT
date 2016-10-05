@@ -107,7 +107,7 @@ set(findall(h1,'type','text'),'Interpreter','none');
 waitbar(0,h1,['Making guesses for ',fname]);
 
 for ll=1:movsz(3)
-    waitbar(ll/movsz(3),h1)%update waitbar
+    try;waitbar(ll/movsz(3),h1);end
     %using the percentile on each frame
     if pctile_frame
         %padding the current frame to avoid the Fourier ringing associated

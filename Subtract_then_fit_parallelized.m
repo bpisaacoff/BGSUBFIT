@@ -111,10 +111,7 @@ h1=waitbar(0);
 set(findall(h1,'type','text'),'Interpreter','none');
 waitbar(0,h1,['Fitting ',fname]);
 for jj=1:movsz(3)
-    try
-        waitbar(jj/movsz(3),h1)
-    catch
-    end
+    try; waitbar(jj/movsz(3),h1); end
     
     curfrmnum=jj;
     
