@@ -1,9 +1,17 @@
-%% SimulateData
+%% SimulateDataPoisson
 % last update 10/5/16 BPI
-% A simple script to simulate PAINT data with various backgrounds. Current
+% A simple script to simulate molecule data with various backgrounds. Current
 % implementation uses Poissonian probability distributions (poissrnd) for
 % shot noise, and Guassian distributions for molecule brightness, and track
 % length. Molecule positions are also random using matlab's randi function.
+%
+% You can change all of the parameters of the simulated movie by changing
+% the parameters in the Control Panel below. The script will then save the
+% simulated movie as a tiff stack. It will also save a .mat file with the
+% ground truths of the molecules.
+%
+% You can check how accurate your fitting was by using the included script
+% Check_Fitting_Simulated.
 
 %% Control Panel
 
@@ -11,7 +19,7 @@
 %file extension please, leave blank if you don't want to save this, like
 %filename='';
 directoryname='C:\Users\isaacoff\Documents\BGSUBFit\Test data and simulations\';
-filename='SimData_wGNRs';
+filename='SimData';
 
 movsz=[256,256,100];%frame size then frame numbers
 
@@ -27,8 +35,8 @@ molmin=40;%minimum brightness
 constant_brightness=0;%if one then use a constant brightness and not a distribution
 
 %molecule turning on distribution per frame
-onmean=2;
-onstd=1;
+onmean=1;
+onstd=3;
 
 %molecule track distribution
 trkmean=3;
@@ -39,7 +47,7 @@ difstd=2;
 
 %%%% Complex Backgrounds %%%%
 %Settings for some constant PL GNRs
-make_GNRs=1;%Boolean for GNR addition
+make_GNRs=0;%Boolean for GNR addition
 numGNRs=7;%number of GNRs to add
 %GNR brightness distribution
 GNRmean=350;%GNR mean

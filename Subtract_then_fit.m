@@ -1,29 +1,34 @@
 function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,edgedist,stdtol,maxerr)
-%% Subtract_mol_off_frames 
+%% Subtract_mol_off_frames
 % subtracts the average intensity of off frames for each guess
 % stored in Mol_off_frames_fname.
+%
+% If you just want to do fitting, and not do background subtraction, set
+% Mol_off_frames_fname = 'nobgsub'. The program will take care of
+% everything else.
 
 %%%% Inputs %%%%
 % mov_fname the filename of the tiff stack movie
 
 % Mol_off_frames_fname is the filename .mat file output from the function
-% Mol_off_frames
+% Mol_off_frames. If not doing background subtraction, set this to
+% 'nobgsub'
 
 % guessfname is the filename for the guesses .mat file
 
 % MLE_fit  a Boolean determining whether or not MLE fitting is used. Set to
 % 1 to use MLE and to 0 to use least squares. Default is 0. Note that MLE
-% is quite slow, and so its nots recommended for a large number of guesses
+% is quite slow, and so its not recommended for a large number of guesses
 
 % edgedist is the distance in pixels from the edge of the frame to ignore.
 % default is 10
 
 % stdtol is tolerance on fit Gaussian STD, to leae filtering options for
-% later, default value is 5
+% later, default value is 1.5
 
 % maxerr is the maximum error of the fit for MLE fit, using variance default
 % 0.1 (can't be above this) for LSQR fit, using the 95% confidence interval
-% on the position, default max is 3
+% on the position, default max is 2
 
 %%%% Output %%%%
 % a .mat file, importantly containing the fits array with columns:
@@ -36,13 +41,13 @@ function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,ed
 % gaussfit (for least squares fitting)
 
 %  Copyright 2016 Benjamin P Isaacoff
-% 
+%
 % Licensed under the Apache License, Version 2.0 (the "License"); you
 % may not use this file except in compliance with the License. You may
 % obtain a copy of the License at
-% 
+%
 %   http://www.apache.org/licenses/LICENSE-2.0
-% 
+%
 % Unless required by applicable law or agreed to in writing, software
 % distributed under the License is distributed on an "AS IS" BASIS,
 % WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
@@ -52,19 +57,17 @@ function  Subtract_then_fit(mov_fname,Mol_off_frames_fname,guessfname,MLE_fit,ed
 
 if nargin<4;MLE_fit=0;end
 if nargin<5;edgedist=10;end
-if nargin<6;stdtol=5;end
+if nargin<6;stdtol=1.5;end
 if nargin<7;
     if MLE_fit
         maxerr=0.1;
     else
-        maxerr=3;
+        maxerr=2;
     end
 end
 
 tic;%for measuring the time to run the entire program
 %% Import the data
-% load off frames list and some parameters
-load(Mol_off_frames_fname,'off_frames','dfrlmsz','moloffwin')
 
 %create A `TIFFStack` object  which behaves like a read-only memory
 %mapped TIFF file
@@ -73,10 +76,28 @@ movsz=size(tfstk);%the size of the movie
 [pathstr,fname,~] = fileparts(mov_fname);
 
 % load the guesses
-load(guessfname,'guesses');
+load(guessfname,'guesses','dfrlmsz');
 
-%check number of fits vs length of off frames
-if size(guesses,1)~=numel(off_frames);error('Unequal number of fits and number of off frames lists');end
+%check that the bgsub is actually happening
+bgsub=1;
+if strcmp(Mol_off_frames_fname,'nobgsub');bgsub=0;end
+
+if bgsub
+    % load off frames list and some parameters
+    load(Mol_off_frames_fname,'off_frames','moloffwin')
+else
+    %set moloffwin to a fifth of the frames, just for memory purposes
+    moloffwin=round(movsz(3)/5);
+    %create filled off_frames cell for simplicity, this isn't used for
+    %anything other than not being empty
+    off_frames=cell([size(guesses,1),1]);
+    off_frames(:)={'foobar'};
+end
+
+if bgsub
+    %check number of fits vs length of off frames
+    if size(guesses,1)~=numel(off_frames);error('Unequal number of fits and number of off frames lists');end
+end
 
 % import the first moloffwin+1 frames
 curframes=1:(moloffwin+1);
@@ -96,9 +117,10 @@ fits=NaN(size(guesses,1),9);
 h1=waitbar(0);
 set(findall(h1,'type','text'),'Interpreter','none');
 waitbar(0,h1,['Fitting ',fname]);
-for ii=1:size(guesses,1)   
+for ii=1:size(guesses,1)
     try; waitbar(ii/size(guesses,1),h1); end
-        
+    
+    %current frame number
     curfrmnum=guesses(ii,1);
     
     %determine the frame list of frames to check for the current frame
@@ -137,14 +159,18 @@ for ii=1:size(guesses,1)
     %checking that it's not outside the frame and that off_frames for this
     %guess isn't empty
     if (molc>edgedist && molc<(movsz(2)-edgedist) && molr>edgedist && molr<(movsz(1)-edgedist)) && ...
-            (molc>dfrlmsz && molc<(movsz(2)-dfrlmsz) && molr>dfrlmsz && molr<(movsz(1)-dfrlmsz))&& ... 
+            (molc>dfrlmsz && molc<(movsz(2)-dfrlmsz) && molr>dfrlmsz && molr<(movsz(1)-dfrlmsz))&& ...
             ~isempty(off_frames{ii})
-        %the average frame
-        mean_mov=mean(mov(molr+(-dfrlmsz:dfrlmsz),molc+(-dfrlmsz:dfrlmsz),off_frames{ii}-frmlst(1)+1),3);
-        %the molecule image
-        molim=mov(molr+(-dfrlmsz:dfrlmsz),molc+(-dfrlmsz:dfrlmsz),curfrmnum-frmlst(1)+1);
-        %the subtracted image
-        data=molim-mean_mov;        
+        if bgsub
+            %the average frame
+            mean_mov=mean(mov(molr+(-dfrlmsz:dfrlmsz),molc+(-dfrlmsz:dfrlmsz),off_frames{ii}-frmlst(1)+1),3);
+            %the molecule image
+            molim=mov(molr+(-dfrlmsz:dfrlmsz),molc+(-dfrlmsz:dfrlmsz),curfrmnum-frmlst(1)+1);
+            %the subtracted image
+            data=molim-mean_mov;
+        else
+            data=mov(molr+(-dfrlmsz:dfrlmsz),molc+(-dfrlmsz:dfrlmsz),curfrmnum-frmlst(1)+1);
+        end
         
         %%%% Fitting %%%%
         plot_on=0;%for debugging purposes only!
@@ -161,9 +187,11 @@ for ii=1:size(guesses,1)
             %fitting with MLE
             [paramsF,varianceF] = MLEwG (data,params0,1,plot_on,1);
             paramsF=[paramsF,varianceF];
+            %shifting
+            paramsF([1,2])=paramsF([1,2])+0.5;
             %recalculating the values based on their equations to match
             paramsF(5)=paramsF(5)*(2*pi*paramsF(3)^2);
-            paramsF(4)=sqrt(paramsF(4));            
+            paramsF(4)=sqrt(paramsF(4));
             errbad=varianceF>maxerr;%too much error on fit?
         else
             %fitting with least squares
@@ -172,12 +200,12 @@ for ii=1:size(guesses,1)
             catch
                 conf95=[inf,inf];
                 fitPars=[0,0,0,0,0,0];
-                warning('gaussfit error')
+                warning('gaussFit error')
             end
             %converting the variables to match the output of MLEwG
             paramsF=[fitPars(1),fitPars(2),fitPars(3),fitPars(5),...
                 fitPars(4),mean(conf95([1,2]))];
-            errbad=mean(conf95([1,2]))>maxerr;%too much error on fit?            
+            errbad=mean(conf95([1,2]))>maxerr;%too much error on fit?
         end
         %Convert back into full frame coordinates, NOTE the -1!
         act_r=paramsF(1)-dfrlmsz-1+molr;
@@ -190,12 +218,12 @@ for ii=1:size(guesses,1)
                 ~any([paramsF([1,2,5]),sumsum]<0) %none of the fitted parameters should be negative, except the offset!
             
             %Put the results into the array
-            fits(ii,:)=[curfrmnum,act_r,act_c,paramsF(3:6),sumsum,1];            
+            fits(ii,:)=[curfrmnum,act_r,act_c,paramsF(3:6),sumsum,1];
         else
             %track the guesses that don't get fit, for debugging/viewfits
             %purposes
             fits(ii,:)=[curfrmnum,act_r,act_c,paramsF(3:6),sumsum,0];
-        end        
+        end
         %debugging
         if plot_on
             h12=figure(12);
@@ -222,7 +250,12 @@ end
 fits_col_headers={'frame num','row pos (px)','column pos (px)','sigma (px)','offset','N','error','sum(:)','goodfit boolean'};
 tictoc=toc;%the time to run the entire program
 %save the data
-save([pathstr,filesep,fname,'_AccBGSUB_fits.mat'],'fits','fits_col_headers','mov_fname','Mol_off_frames_fname','guessfname',...
+if bgsub
+    fname=[pathstr,filesep,fname,'_AccBGSUB_fits.mat'];
+else
+    fname=[pathstr,filesep,fname,'_fits.mat'];
+end
+save(fname,'fits','fits_col_headers','mov_fname','Mol_off_frames_fname','guessfname',...
     'MLE_fit','stdtol','maxerr','dfrlmsz','movsz','moloffwin','tictoc')
 
 try

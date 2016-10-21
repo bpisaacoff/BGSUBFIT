@@ -34,19 +34,21 @@ function off_frames=Mol_off_frames(guessfname,dfrlmsz,moloffwin)
 % implied. See the License for the specific language governing
 % permissions and limitations under the License.
 
-%did you forget to set it to an integer?
-dfrlmsz=round(dfrlmsz);
-
-%rounding moloffwin up to the next even number, in case you also forgot for
-%this one
-moloffwin=ceil(moloffwin/2)*2;
+% Erroring out if dfrlmsz isn't an integer, because it's a "strong"
+% parameter. You should really input what you mean.
+if dfrlmsz~=round(dfrlmsz);error('dfrlmsz must be an integer');end
+%rounding moloffwin
+if moloffwin~=(ceil(moloffwin/2)*2)
+    moloffwin=(ceil(moloffwin/2)*2);
+    warning(['moloffwin must be an even integer. It has been reset to avgwin = ',num2str(moloffwin)])
+end
 
 % last updated 8/12/16 BPI
 
 % NOTE: if you're inspecting this code, you'll notice that I'm making use
 % of ismembc instead of ismember. ismembc is an undocumented helper
-% function that is much faster than ismember in this case. Basicallc
-% ismember eventuallc calls ismembc, but wastes a lot of time before
+% function that is much faster than ismember in this case. Basically
+% ismember eventually calls ismembc, but wastes a lot of time before
 % getting there that we've cut out.
 
 tic;%for measuring the time to run the entire program
@@ -109,9 +111,7 @@ for ii=1:movsz(3)
     end
 end
 
-try
-    close(h1)
-end
+try;close(h1);end
 
 tictoc=toc;%the time to run the entire program
 

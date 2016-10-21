@@ -8,7 +8,7 @@ function  ViewFits(movfname,fits_fname,circ_D,write_mov,autoscale_on,linewidth)
 % write_mov is a boolean determining whether the viewfits movie will be
 % written to an avi. If set to 0 this function will be used in debug mode
 %
-% autoscale_on is a boolean determining if the movie greyscale will
+% autoscale_on is a boolean determining if the movie grayscale will
 % be set frame by frame. If set to 0 a handful of frames throughout the movie
 % are used to set the grayscale
 % 

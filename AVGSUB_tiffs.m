@@ -1,11 +1,14 @@
-function  AVGSUB_tiffs(filename,runningavg,subwidth,offset)
+function  AVGSUB_tiffs(filename,do_avg,runningavg,subwidth,offset)
 %% AVGSUB_tiffs
-% updated BPI 8/12/16
-% This function does average subtraction on a batch of tiff stacks
+% updated BPI 10/13/16
+% This function does average (or median) subtraction on a batch of tiff stacks
 % movies. Currently does the entire movie, I might add functionality to do
 % a portion of the frames only.
 
 % filename is the name of the tiffstack to be subtracted
+
+% do_avg is a boolean. Set to 1 to use an average, or set to 0 to use a
+% median. Note median is a lot slower than mean.
 
 % runningavg is a boolean. Set to 1 to do a running average or set to 0 to
 % do a static window background subtraction
@@ -27,13 +30,13 @@ function  AVGSUB_tiffs(filename,runningavg,subwidth,offset)
 % saveastiff
 
 %  Copyright 2016 Benjamin P Isaacoff
-% 
+%
 % Licensed under the Apache License, Version 2.0 (the "License"); you
 % may not use this file except in compliance with the License. You may
 % obtain a copy of the License at
-% 
+%
 %   http://www.apache.org/licenses/LICENSE-2.0
-% 
+%
 % Unless required by applicable law or agreed to in writing, software
 % distributed under the License is distributed on an "AS IS" BASIS,
 % WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
@@ -42,7 +45,10 @@ function  AVGSUB_tiffs(filename,runningavg,subwidth,offset)
 
 %rounding subwidth up to the next odd number down, in case you didn't read the
 %instructions
-subwidth=ceil(subwidth/2)*2-1;
+if subwidth~=(ceil(subwidth/2)*2-1)
+    subwidth=ceil(subwidth/2)*2-1;
+    warning(['subwidth must be an odd integer. It has been reset to subwidth = ',num2str(subwidth)])
+end
 
 tic;%for measuring the time to run the entire program
 
@@ -58,11 +64,14 @@ if nargin<4;offset=1000;end
 tfstk=TIFFStack(filename);
 movsz=size(tfstk);%the size of the movie
 
+%create the waitbar
 h1=waitbar(0);
 set(findall(h1,'type','text'),'Interpreter','none');
 waitbar(0,h1,['writing avg sub frames for ',fname]);
 
+%initialize the bgsub movie
 bgsub_mov=zeros(movsz);
+%different loops depending on running or static window
 if runningavg
     if mod(subwidth,2)==0;error('subwidth needs to be an odd integer');end
     v=tfstk(:,:,1:subwidth); %the first subwidth frames
@@ -76,17 +85,29 @@ if runningavg
         elseif jj>floor(subwidth/2)%frames in the middle
             v=cat(3,v(:,:,2:end),tfstk(:,:,jj+floor(subwidth/2)));
         end
-        bgsub_mov(:,:,jj)=bsxfun(@plus,double(curr_v),-mean(v,3))+offset;
+        if do_avg
+            bgsub_mov(:,:,jj)=bsxfun(@plus,double(curr_v),-mean(v,3))+offset;
+        else
+            bgsub_mov(:,:,jj)=bsxfun(@plus,double(curr_v),-double(median(v,3)))+offset;
+        end
     end
 else
     for jj=1:floor(movsz(3)/subwidth)
         try;waitbar(jj/movsz(3),h1);end
         if jj~=floor(movsz(3)/subwidth)
             v=tfstk(:,:,1+subwidth*(jj-1):subwidth*jj);
-            bgsub_mov(:,:,1+subwidth*(jj-1):subwidth*jj)=bsxfun(@plus,double(v),-mean(v,3))+offset;
+            if do_avg
+                bgsub_mov(:,:,1+subwidth*(jj-1):subwidth*jj)=bsxfun(@plus,double(v),-mean(v,3))+offset;
+            else
+                bgsub_mov(:,:,1+subwidth*(jj-1):subwidth*jj)=bsxfun(@plus,double(v),-double(median(v,3)))+offset;
+            end
         else
             v=tfstk(:,:,1+subwidth*(jj-1):movsz(3));
-            bgsub_mov(:,:,1+subwidth*(jj-1):movsz(3))=bsxfun(@plus,double(v),-mean(v,3))+offset;
+            if do_avg
+                bgsub_mov(:,:,1+subwidth*(jj-1):movsz(3))=bsxfun(@plus,double(v),-mean(v,3))+offset;
+            else
+                bgsub_mov(:,:,1+subwidth*(jj-1):movsz(3))=bsxfun(@plus,double(v),-double(median(v,3)))+offset;
+            end
         end
     end
 end
@@ -96,14 +117,18 @@ options.overwrite=true;
 %save using saveastiff
 saveastiff(uint16(bgsub_mov), [pathstr,filesep,fname,'_avgsub.tif'],options);
 
-try
-    close(h1)
-end
+%close the waitbar
+try; close(h1); end
 
 tictoc=toc;%the time to run the entire program
 
 %save a .txt file with the parameters
 fileID = fopen([pathstr,filesep,fname,'_avgsub_info.txt'],'w');
+if do_avg
+    fprintf(fileID,'Average of background was subtracted\n');
+else
+    fprintf(fileID,'Median of background was subtracted\n');
+end
 fprintf(fileID,['running average:\t',num2str(runningavg),'\n']);
 fprintf(fileID,['subwidth:\t',num2str(subwidth),'\n']);
 fprintf(fileID,['offset:\t',num2str(offset),'\n']);

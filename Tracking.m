@@ -1,4 +1,4 @@
-function tracks = Tracking(fits_fname,trackparams)
+function tracks = Tracking(fits_fname,trackparams,savetracks)
 %% Tracking
 % written BPI 6/7/16
 % This function is just a wrapper for Track_3D2 to interface with the fit
@@ -52,6 +52,10 @@ goodfits(:,14)=gdfts(:,8);%intensity
 
 trfile=Track_3D2(goodfits,trackparams(1),alpha,trackparams(3),trackparams(5),trackparams(6),...
     1,trackparams(7),trackparams(2));
+
+if savetracks
+    save([fits_fname,'_tracks'],'trfile','trackparams')
+end
 
 %get rid of useless fits from the tracking program
 % tracks is made of 1: frame #, 2: x (px), 3: y (px), 4: track #

@@ -1,5 +1,10 @@
 % Maximum likelihood fit to a 2D Gaussian with a constant background
 %
+% From
+% K. I. Mortensen, L. S. Churchman, J. A. Spudich, and H. Flyvbjerg, Nat.
+% Methods 7, 377 (2010) doi:10.1038/nmeth.1447 
+%
+%
 %   N* 1/(2*pi*s^2) * exp (-( (x-ux).^2+(y-uy).^2 ) / (2*s^2)) + b^2
 %
 % Input Parameters:

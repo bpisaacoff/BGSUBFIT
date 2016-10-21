@@ -1,5 +1,7 @@
 function track_data=Track_3D2(fitfile1,min_merit,alpha,gamma,min_tr_length,speed_boxcar_halfsize,pxsize,....
     timedelay,itgtime)
+% Written by David J. Rowland, The University of Michigan
+%
 % This code takes in the good fits file returned by the
 % 'Astig3D_master_program.m' code and does single particle tracking in 3D
 % by minimizing the distance between all possible pairs of fits.

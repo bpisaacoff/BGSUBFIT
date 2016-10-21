@@ -1,11 +1,12 @@
-%% control panel
+%% Check_Fitting_Simulated
+%%%control panel%%%
 % The only section you should have to change anything
 %Filename assuming that you're using the defualt filenames in BGSUBFIT
 %The directory where the data is (with a \ at the end)
-directory_name='C:\Users\isaacoff\Documents\BGSUBFit\Test data and simulations\';
+directory_name='C:\Users\isaacoff\Documents\Temp_Data_Analysis\Test_Functions\';
 
 %the name of the movie
-namebase='SimData_wGNRs';
+namebase='SimData';
 
 %This lets you click through the frames to see the individual fits
 viewfits_bool=0;
@@ -28,7 +29,8 @@ cohort_error=0;%show percent error based on mean of simulated population
 simfname=[directory_name,namebase,'_params.mat'];
 load(simfname,'sim_mols');
 
-ges_fname=[directory_name,namebase,'_avgsub_guesses.mat'];
+% ges_fname=[directory_name,namebase,'_avgsub_guesses.mat'];
+ges_fname=[directory_name,namebase,'_guesses.mat'];
 
 load(ges_fname,'guesses','dfrlmsz','corgess','sim2gess')
 
@@ -118,6 +120,8 @@ fn=(size(sim_mols,1)-intsct)/size(sim_mols,1);
 disp(['Guess Jaccard Index = ',num2str(jaccard)])
 disp(['Guess false positive rate = ',num2str(fp)])
 disp(['Guess false negative rate = ',num2str(fn)])
+
+% break %debugging
 
 % end
 %% Intensity comparisons

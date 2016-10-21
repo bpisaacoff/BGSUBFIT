@@ -1,4 +1,4 @@
-function trk_filt= Track_filter(fits_fname,append_vec,trackparams)
+function trk_filt= Track_filter(fits_fname,append_vec,trackparams,savetracks)
 %% Track_filter
 % written BPI 6/7/16
 % Track_filter is a function to filter based on tracking. Currently just
@@ -20,6 +20,7 @@ function trk_filt= Track_filter(fits_fname,append_vec,trackparams)
 % the function also can append the fit .mat file with trk_filt
 
 if nargin<2;append_vec=0;end
+if nargin<4;savetracks=0;end
 
 %% Default tracking parameters
 if nargin<3
@@ -44,7 +45,7 @@ end
 [~,fname] = fileparts(fits_fname);
 disp(['Tracking ',fname]);
 
-tracks = Tracking(fits_fname,trackparams);
+tracks = Tracking(fits_fname,trackparams,savetracks);
 
 load(fits_fname,'fits')
 

@@ -1,8 +1,11 @@
 function [assignment,merit] = hungarian(penalty)
-%% ------------------------------------------------------------------------
+%% 
+% version 2.3 by Yi Cao at Cranfield University on 11th September 2011
+%------------------------------------------------------------------------
 %  Variable names modified by YL Oct.20, 2012
 %  ------------------------------------------------------------------------
-
+% 
+% 
 % MUNKRES   Munkres (Hungarian) Algorithm for Linear Assignment Problem. 
 %
 % [ASSIGN,merit] = munkres(penalty) returns the optimal column indices,

@@ -38,7 +38,6 @@ function guesses=Guessing(mov_fname,dfrlmsz,bpthrsh,egdesz,pctile_frame,debugmod
 % bpass
 % TIFFStack
 %
-%
 %  Copyright 2016 Benjamin P Isaacoff
 %
 % Licensed under the Apache License, Version 2.0 (the "License"); you
@@ -59,11 +58,8 @@ if nargin<4;egdesz=dfrlmsz;end
 if nargin<5;pctile_frame=1;end
 if nargin<6;debugmode=0;end
 
-%did you forget to set it to an integer?
-if dfrlmsz~=round(dfrlmsz)
-    warning('dfrlmsz is not an integer, it has been rounded to the nearest integer')
-    dfrlmsz=round(dfrlmsz);
-end
+%did you not set dfrlmsz to an integer?
+if dfrlmsz~=round(dfrlmsz);error('dfrlmsz must be an integer');end
 
 %pad size for the bandpass function
 pdsz=50;
