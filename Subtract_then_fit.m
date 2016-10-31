@@ -87,7 +87,7 @@ if bgsub
     load(Mol_off_frames_fname,'off_frames','moloffwin')
 else
     %set moloffwin to a fifth of the frames, just for memory purposes
-    moloffwin=round(movsz(3)/5);
+    moloffwin=ceil((movsz(3)/5)/2)*2;
     %create filled off_frames cell for simplicity, this isn't used for
     %anything other than not being empty
     off_frames=cell([size(guesses,1),1]);

@@ -241,7 +241,7 @@ end
 % the off frames list to a .mat file, called guessesname_Mol_off_frames.mat
 if params.makeOffFrames && params.bgsub
     for ii=1:numel(dlocs);
-        Mol_off_frames([dlocs{ii},filesep,dnames{ii},'_avgsub_guesses'],dfrlmsz,moloffwin);
+        Mol_off_frames([dlocs{ii},filesep,dnames{ii},'_avgsub_guesses.mat'],dfrlmsz,moloffwin);
     end
 end
 
@@ -256,12 +256,12 @@ if params.fitting
     for ii=1:numel(dlocs);
         if params.bgsub
             Subtract_then_fit([dlocs{ii},filesep,dnames{ii},'.tif'],...
-                [dlocs{ii},filesep,dnames{ii},'_avgsub_guesses_Mol_off_frames'],...
-                [dlocs{ii},filesep,dnames{ii},'_avgsub_guesses'],...
+                [dlocs{ii},filesep,dnames{ii},'_avgsub_guesses_Mol_off_frames.mat'],...
+                [dlocs{ii},filesep,dnames{ii},'_avgsub_guesses.mat'],...
                 params.MLE_fit,params.egdesz,params.stdtol,params.maxerr);
         else
             Subtract_then_fit([dlocs{ii},filesep,dnames{ii},'.tif'],'nobgsub',...
-                [dlocs{ii},filesep,dnames{ii},'_guesses'],...
+                [dlocs{ii},filesep,dnames{ii},'_guesses.mat'],...
                 params.MLE_fit,params.egdesz,params.stdtol,params.maxerr);
         end
     end
@@ -275,9 +275,9 @@ end
 if params.tracking
     for ii=1:numel(dlocs);
         if params.bgsub
-            Track_filter([dlocs{ii},filesep,dnames{ii},'_AccBGSUB_fits'],1,params.trackparams,params.savetracks);
+            Track_filter([dlocs{ii},filesep,dnames{ii},'_AccBGSUB_fits.mat'],1,params.trackparams,params.savetracks);
         else
-            Track_filter([dlocs{ii},filesep,dnames{ii},'_fits'],1,params.trackparams,params.savetracks);
+            Track_filter([dlocs{ii},filesep,dnames{ii},'_fits.mat'],1,params.trackparams,params.savetracks);
         end
     end
 end
@@ -294,11 +294,11 @@ if params.makeViewFits
             else
                 VF_fname=[dlocs{ii},filesep,dnames{ii},'_avgsub.tif'];
             end
-            ViewFits(VF_fname,[dlocs{ii},filesep,dnames{ii},'_AccBGSUB_fits'],...
+            ViewFits(VF_fname,[dlocs{ii},filesep,dnames{ii},'_AccBGSUB_fits.mat'],...
                 params.circ_D,params.write_mov,params.autoscale_on,params.linewidth)
         else
             ViewFits([dlocs{ii},filesep,dnames{ii},'.tif'],...
-                [dlocs{ii},filesep,dnames{ii},'_fits'],...
+                [dlocs{ii},filesep,dnames{ii},'_fits.mat'],...
                 params.circ_D,params.write_mov,params.autoscale_on,params.linewidth)
         end
     end
