@@ -1,6 +1,6 @@
 # OUT OF DATE
 
-This is an arch
+This is an archived and NOT UPDATED repository containing a previous generation of the SMALL-LABS code. Please go to https://github.com/BiteenMatlab/SMALL-LABS to get the updated version
 
 
 # BGSUBFIT
